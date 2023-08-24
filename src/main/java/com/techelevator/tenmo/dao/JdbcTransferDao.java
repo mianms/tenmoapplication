@@ -1,11 +1,12 @@
 package com.techelevator.tenmo.dao;
-
-import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.DaoException.DaoException;
 import com.techelevator.tenmo.model.Transfer;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,37 +18,75 @@ public class JdbcTransferDao implements TransferDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Transfer createTransfer(int fromAccountId, int toAccountId, int transferAmount, boolean transferStatus) {
+    @Override
+    public Transfer getTransferById(int id) {
+        Transfer transfer = null;
+        String sql = "SELECT transfer WHERE transfer_id = ?";
+
+        try {
+            SqlRowSet results = this.jdbcTemplate.queryForRowSet(sql, id);
+            if (results.next()) {
+                transfer = mapRowToTransfer(results);
+            }
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Unable to connect to server or database", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new DaoException("SQL syntax error", e);
+        }
+        return transfer;
+    }
+
+
+    public Transfer createTransfer(int toAccountId, int fromAccountId, int transferAmount, boolean transferStatus) {
+
         Transfer newTransfer = null;
         String sql = "INSERT INTO transfer (" +
                 "account_from, account_to, transfer_amount, transfer_status) " +
                 "VALUES (?, ?, ?, ?) RETURNING transfer_id";
 
-        Transfer transfer = new Transfer(fromAccountId, toAccountId, transferAmount, transferStatus);
-
         try {
-            this.jdbcTemplate.queryForObject(
+            int newTransferId = this.jdbcTemplate.queryForObject(
                     sql,
                     Integer.class,
-                    transfer.getFromAccountId(),
-                    transfer.getToAccountId(),
-                    transfer.getTransferAmount(),
-                    transfer.isTransferStatus());
+                    fromAccountId,
+                    toAccountId,
+                    transferAmount,
+                    transferStatus);
 
-            return transfer;
+            return getTransferById(newTransferId);
 
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Unable to connect to server or database", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new DaoException("Data integrity violation", e);
         }
     }
 
+    @Override
+    public List<Transfer> transferHistory(int accountId) {
+        List<Transfer> listOfTransfers = new ArrayList<>();
+        String sql = "SELECT transfer_id, to_account_id, from_account_id, transfer_amount, transfer_status " +
+                     "FROM transfer WHERE to_account_id = ? OR from_account_id = ?";
+        SqlRowSet result = this.jdbcTemplate.queryForRowSet(sql, accountId, accountId);
+        while (result.next()) {
+            int id = result.getInt("transfer_id");
+            int toAccountId = result.getInt("to_account_id");
+            int fromAccountId = result.getInt("from_account_id");
+            BigDecimal transferAmount = result.getBigDecimal("transfer_amount");
+            Boolean transferStatus = true;
+            Transfer transfer = new Transfer(id, toAccountId, fromAccountId, transferAmount, transferStatus);
+            listOfTransfers.add(transfer);
+
+        }
+        return listOfTransfers;
+    }
 
     private Transfer mapRowToTransfer(SqlRowSet trans) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(trans.getInt("transfer_id"));
         transfer.setFromAccountId(trans.getInt("account_from"));
         transfer.setToAccountId(trans.getInt("account_to"));
-        transfer.setTransferAmount(trans.getDouble("transfer_amount"));
+        transfer.setTransferAmount(trans.getBigDecimal("transfer_amount"));
         transfer.setTransferStatus(true);
         return transfer;
     }

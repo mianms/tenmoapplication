@@ -15,30 +15,22 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public double getBalance() {
-        double balance = 0;
+    public Account getUsernameAndBalance() {
+        String sql = "SELECT username, balance FROM tenmo_user JOIN account ON temo_user.user_id = account.user_id;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+        Account myAccount = mapRowToAccount(results);
 
-        String sql = "SELECT balance from account";
-        SqlRowSet result = this.jdbcTemplate.queryForRowSet(sql);
-        while (result.next()) {
-            balance = result.getDouble("balance");
-        }
-        return balance;
+        return myAccount;
     }
 
 
-    private Account mapRowToAccount(SqlRowSet acc) {
+    private Account mapRowToAccount(SqlRowSet rs) {
         Account account = new Account();
-        account.setAccountId(acc.getInt("account_id"));
-        account.setUserId(acc.getInt("user_id"));
-        account.setBalance(acc.getInt("balance"));
-        account.setUsername(account.getUsername("username"));
+        account.setUsername(rs.getString("username"));
+        account.setBalance(rs.getBigDecimal("balance"));
         return account;
     }
 
-
-    @Override
-    public String getUsername() {
-        return null;
-    }
 }
+
+

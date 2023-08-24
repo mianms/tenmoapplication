@@ -30,8 +30,10 @@ CREATE TABLE account (
 	account_id int NOT NULL DEFAULT nextval('seq_account_id'),
 	user_id int NOT NULL,
 	balance numeric(13, 2) NOT NULL,
+	username varchar (50) NOT NULL
 	CONSTRAINT PK_account PRIMARY KEY (account_id),
-	CONSTRAINT FK_account_tenmo_user FOREIGN KEY (user_id) REFERENCES tenmo_user (user_id)
+	CONSTRAINT FK_account_tenmo_user FOREIGN KEY (user_id) REFERENCES tenmo_user (user_id),
+	CONSTRAINT FK_account_tenmo_username FOREIGN KEY (username) REFERENCES tenmo_user (username)
 );
 
 CREATE SEQUENCE seq_transfer_id
@@ -48,7 +50,7 @@ CREATE TABLE transfer (
 	transfer_status boolean NOT NULL,
 	CONSTRAINT PK_transfer PRIMARY KEY (transfer_id),
 	CONSTRAINT FK_transfer_account FOREIGN KEY (account_from) REFERENCES account (account_id),
-	CONSTRAINT FK_transfer_account FOREIGN KEY (account_to) REFERENCES account (account_id),
+	CONSTRAINT FK_transfer_account2 FOREIGN KEY (account_to) REFERENCES account (account_id),
 	CONSTRAINT ck_transfer_to_self CHECK(account_from != account_to),
 	CONSTRAINT ck_transfer_amount_not_zero CHECK (transfer_amount > '0')
 	

@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-@PreAuthorize("isAuthenticated()")
+import java.security.Principal;
+
+
 @RestController
 @RequestMapping("api")
 public class AccountController {
@@ -21,12 +23,13 @@ public class AccountController {
         this.accountDao = accountDao;
     }
 
-    @PreAuthorize("hasRole('USER')")
-    @RequestMapping(path = "/balance", method = RequestMethod.GET)
-    public Account getUsernameAndBalance() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        return accountDao.getUsernameAndBalance(username);
+
+    @RequestMapping(path = "/getBalance", method = RequestMethod.GET)
+    public Account getUsernameAndBalance(Principal principal) {
+
+        String username = principal.getName();
+       Account newAccount = this.accountDao.getUsernameAndBalance(username);
+        return newAccount;
 
 
     }

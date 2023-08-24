@@ -1,7 +1,5 @@
 package com.techelevator.tenmo.dao;
 
-import com.techelevator.tenmo.DaoException.DaoException;
-import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.User;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -21,7 +19,7 @@ public class JdbcUserDao implements UserDao {
 
 
     private JdbcTemplate jdbcTemplate;
-    private JdbcAccountDao newAccount;
+
 
     public JdbcUserDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -50,6 +48,8 @@ public class JdbcUserDao implements UserDao {
         return users;
     }
 
+
+
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
         String sql = "SELECT user_id, username, password_hash FROM tenmo_user WHERE username ILIKE ?;";
@@ -74,17 +74,14 @@ public class JdbcUserDao implements UserDao {
         } catch (DataAccessException e) {
             return false;
         }
-        sql = "INSERT INTO account (user_id, balance) VALUES (? ,?) RETURNING account_id";
+        String createAccount = "INSERT INTO account (username, user_id, balance) VALUES (?, ? ,?) RETURNING account_id";
+
+        Integer newAccountid;
         try {
-            newAccountId = jdbcTemplate.queryForObject(sql, Integer.class, newUserId, initialBalance);
-        } catch (DataAccessException e) {
-            return false;
-        }
-        try {
-            newAccountId = jdbcTemplate.queryForObject(sql, Integer.class, newUserId, initialBalance);
+            newAccountId = jdbcTemplate.queryForObject(createAccount, Integer.class, username, newUserId, initialBalance);
 
         } catch (CannotGetJdbcConnectionException e) {
-            throw new DaoException();
+            return false;
         }
         return true;
     }

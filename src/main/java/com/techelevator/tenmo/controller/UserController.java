@@ -5,9 +5,9 @@ import com.techelevator.tenmo.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
-@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("api")
 public class UserController {
@@ -37,5 +37,7 @@ public class UserController {
         int idByUsername = userDao.findIdByUsername(name);
         return idByUsername;
     }
+
+
 
 }

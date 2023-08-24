@@ -20,12 +20,13 @@ public class JdbcAccountDao implements AccountDao {
     @Override
     public Account getUsernameAndBalance(String username) {
 
-        Account myAccount = null;
-        String sql = "SELECT tenmo_user.username, account.balance FROM tenmo_user JOIN account ON temo_user.user_id = account.user_id;";
+        Account myAccount = new Account();
+        String sql = "SELECT username, balance FROM account WHERE username = ?";
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, username);
             if (results.next()) {
                 myAccount = mapRowToAccount(results);
+
             }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);

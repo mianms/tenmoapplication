@@ -11,7 +11,6 @@ public class Account {
     }
 
     public Account(String username, int accountId, int userId, BigDecimal balance) {
-        this.username = username;
         this.accountId = accountId;
         this.userId = userId;
         this.balance = balance;

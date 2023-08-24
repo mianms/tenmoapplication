@@ -3,11 +3,8 @@ package com.techelevator.tenmo.controller;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @PreAuthorize("isAuthenticated()")
@@ -16,13 +13,28 @@ public class UserController {
 
     private UserDao userDao;
 
-    private UserController(UserDao userDao) {
+    public UserController(UserDao userDao) {
         this.userDao = userDao;
     }
 
-    @RequestMapping(value = "/account/transfers/username", method = RequestMethod.GET)
-    public List<User> validRecipients() {
-        List<User> users = new ArrayList<>();
+    //Return list of all users
+    @RequestMapping(value = "api/users", method = RequestMethod.GET)
+    public List<User> users() {
+        return userDao.findAll();
+    }
+
+    //Returns all users based on username
+    @RequestMapping(value = "api/username", method = RequestMethod.GET)
+    public User findAllUsers(@RequestParam String name) {
+        User users = userDao.findByUsername(name);
         return users;
     }
+
+    //Returns userID by username
+    @RequestMapping(value = "api/username/{user_id}", method = RequestMethod.GET)
+    public int getIdByUsername(@PathVariable String name) {
+        int idByUsername = userDao.findIdByUsername(name);
+        return idByUsername;
+    }
+
 }

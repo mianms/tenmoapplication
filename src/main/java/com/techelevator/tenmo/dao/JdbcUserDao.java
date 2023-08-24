@@ -17,13 +17,11 @@ import java.util.List;
 
 @Component
 public class JdbcUserDao implements UserDao {
-
-    private final BigDecimal STARTING_BALANCE = BigDecimal.valueOf(1000);
-
-    private final BigDecimal initialBalance = new BigDecimal(1000);
+    private final BigDecimal initialBalance = new BigDecimal(1000.00);
 
 
     private JdbcTemplate jdbcTemplate;
+    private JdbcAccountDao newAccount;
 
     public JdbcUserDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -78,13 +76,22 @@ public class JdbcUserDao implements UserDao {
         }
         sql = "INSERT INTO account (user_id, balance) VALUES (? ,?) RETURNING account_id";
         try {
-            newAccountId = jdbcTemplate.queryForObject(sql, Integer.class, newUserId, STARTING_BALANCE);
+            newAccountId = jdbcTemplate.queryForObject(sql, Integer.class, newUserId, initialBalance);
         } catch (DataAccessException e) {
             return false;
         }
+        sql = "INSERT INTO account " +
+                "(user_id, balance) " +
+                "VALUES (? ,?) RETURNING account_id";
+
+        try {
+            newAccountId = jdbcTemplate.queryForObject(sql, Integer.class, newUserId, initialBalance);
+
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException();
+        }
         return true;
     }
-
 
 
     private User mapRowToUser(SqlRowSet rs) {

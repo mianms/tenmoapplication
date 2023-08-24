@@ -1,10 +1,13 @@
 package com.techelevator.tenmo.dao;
+
 import com.techelevator.tenmo.DaoException.DaoException;
 import com.techelevator.tenmo.model.Account;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 @Component
 public class JdbcAccountDao implements AccountDao {
@@ -17,8 +20,10 @@ public class JdbcAccountDao implements AccountDao {
 
     @Override
     public Account getUsernameAndBalance() {
+
         Account myAccount = null;
-        String sql = "SELECT username, balance FROM tenmo_user JOIN account ON temo_user.user_id = account.user_id;";
+
+        String sql = "SELECT tenmo_user.username, account.balance FROM tenmo_user JOIN account ON temo_user.user_id = account.user_id;";
 
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
@@ -32,7 +37,7 @@ public class JdbcAccountDao implements AccountDao {
         return myAccount;
     }
 
-    private Account mapRowToAccount(SqlRowSet rs) {
+  public Account mapRowToAccount(SqlRowSet rs) {
         Account account = new Account();
         account.setUsername(rs.getString("username"));
         account.setBalance(rs.getBigDecimal("balance"));

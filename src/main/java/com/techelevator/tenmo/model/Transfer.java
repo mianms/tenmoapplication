@@ -1,7 +1,6 @@
 package com.techelevator.tenmo.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class Transfer {
 
@@ -10,14 +9,16 @@ public class Transfer {
     private int fromAccountId;
     private BigDecimal transferAmount;
     private boolean transferStatus;
-    public Transfer() {}
+
+    public Transfer() {
+    }
 
     public Transfer(int transferId, int toAccountId, int fromAccountId, BigDecimal transferAmount, boolean transferStatus) {
         this.transferId = transferId;
         this.toAccountId = toAccountId;
         this.fromAccountId = fromAccountId;
         this.transferAmount = transferAmount;
-        this.transferStatus = true;
+        this.transferStatus = transferStatus;
     }
 
 

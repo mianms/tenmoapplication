@@ -18,7 +18,7 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public Account getUsernameAndBalance() {
+    public Account getUsernameAndBalance(String username) {
 
         Account myAccount = null;
         String sql = "SELECT tenmo_user.username, account.balance FROM tenmo_user JOIN account ON temo_user.user_id = account.user_id;";
@@ -41,6 +41,7 @@ public class JdbcAccountDao implements AccountDao {
         account.setBalance(rs.getBigDecimal("balance"));
         return account;
     }
+
 }
 
 

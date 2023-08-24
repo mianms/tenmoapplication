@@ -9,11 +9,13 @@ public class Account {
     private int accountId;
     private int userId;
     private BigDecimal balance;
+    private String username;
 
     public Account() {
     }
 
-    public Account(int accountId, int userId, BigDecimal balance) {
+    public Account(String username, int accountId, int userId, BigDecimal balance) {
+        this.username = username;
         this.accountId = accountId;
         this.userId = userId;
         this.balance = balance;
@@ -43,4 +45,11 @@ public class Account {
         this.balance = balance;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }

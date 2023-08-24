@@ -1,7 +1,10 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.DaoException.DaoException;
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.User;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +17,8 @@ import java.util.List;
 
 @Component
 public class JdbcUserDao implements UserDao {
+
+    private final BigDecimal initialBalance = new BigDecimal(1000);
 
     private JdbcTemplate jdbcTemplate;
 
@@ -71,8 +76,13 @@ public class JdbcUserDao implements UserDao {
         String createAccount = "INSERT INTO account " +
                                "(user_id, balance) " +
                                "VALUES (? ,?)";
+        try {
 
+            Integer newAccountID = jdbcTemplate.queryForObject(sql, Integer.class, newUserId, initialBalance );
 
+        }catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException();
+            }
 
         return true;
     }

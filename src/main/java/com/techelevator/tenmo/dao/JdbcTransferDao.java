@@ -1,8 +1,10 @@
 package com.techelevator.tenmo.dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
-public class JdbcTransferDao {
+@Component
+public class JdbcTransferDao implements TransferDao{
 
     private JdbcTemplate jdbcTemplate;
 

@@ -1,9 +1,9 @@
 -- database: tenmo
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS tenmo_user, account;
+DROP TABLE IF EXISTS tenmo_user, account,transfer CASCADE;
 
-DROP SEQUENCE IF EXISTS seq_user_id, seq_account_id;
+DROP SEQUENCE IF EXISTS seq_user_id, seq_account_id, seq_transfer_id CASCADE;
 
 -- Sequence to start user_id values at 1001 instead of 1
 CREATE SEQUENCE seq_user_id
@@ -30,7 +30,7 @@ CREATE TABLE account (
 	account_id int NOT NULL DEFAULT nextval('seq_account_id'),
 	user_id int NOT NULL,
 	balance numeric(13, 2) NOT NULL,
-	username varchar (50) NOT NULL
+	username varchar (50) NOT NULL,
 	CONSTRAINT PK_account PRIMARY KEY (account_id),
 	CONSTRAINT FK_account_tenmo_user FOREIGN KEY (user_id) REFERENCES tenmo_user (user_id),
 	CONSTRAINT FK_account_tenmo_username FOREIGN KEY (username) REFERENCES tenmo_user (username)
@@ -53,14 +53,11 @@ CREATE TABLE transfer (
 	CONSTRAINT FK_transfer_account2 FOREIGN KEY (account_to) REFERENCES account (account_id),
 	CONSTRAINT ck_transfer_to_self CHECK(account_from != account_to),
 	CONSTRAINT ck_transfer_amount_not_zero CHECK (transfer_amount > '0')
-	
+
 );
-																							
+
 
 COMMIT;
-
-
-
 
 
 

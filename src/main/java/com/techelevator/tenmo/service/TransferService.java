@@ -1,7 +1,9 @@
 package com.techelevator.tenmo.service;
 
-import java.math.BigDecimal;
+import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+@Component
 public class TransferService implements TransferServiceDao{
 
     // TODO: Transfer checks here

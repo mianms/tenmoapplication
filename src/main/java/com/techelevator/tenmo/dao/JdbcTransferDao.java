@@ -54,13 +54,6 @@ public class JdbcTransferDao implements TransferDao {
                     transfer.getToAccountId(),
                     transfer.getTransferAmount());
 
-//            //update balances
-//            BigDecimal transferAmount = transfer.getTransferAmount();
-//            int fromId = transfer.getFromAccountId();
-//            int toId = transfer.getToAccountId();
-//
-//            accountDao.updateFromAccount(transferAmount, fromId);
-//            accountDao.updateToAccount(transferAmount, toId);
 
             return getTransferByIdForTransfers(newTransferId);
 

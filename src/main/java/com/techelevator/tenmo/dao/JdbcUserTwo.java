@@ -19,7 +19,7 @@ public class JdbcUserTwo implements UserTwoDao {
     @Override
     public List<UserTwo> findAllButUser(String username) {
         List<UserTwo> users = new ArrayList<>();
-        String sql = "SELECT user_id, username, password_hash FROM tenmo_user WHERE username <> ?;";
+        String sql = "SELECT username FROM tenmo_user WHERE username <> ?;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql, username);
         while (results.next()) {
             UserTwo user = mapRowToUserTwo(results);

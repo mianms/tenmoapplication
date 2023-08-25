@@ -6,9 +6,13 @@ import java.util.List;
 
 public interface TransferDao {
 
-    Transfer getTransferById(int id);
+    Transfer getTransferByIdForTransfers(int id);
 
-    Transfer createTransfer(int toAccountId, int fromAccountId, int transferAmount, boolean transferStatus);
+
+    Transfer createTransfer(Transfer transfer);
 
     List<Transfer> transferHistory(int accountId);
+
+    int getAccountIdForTransfers(String username);
+
 }

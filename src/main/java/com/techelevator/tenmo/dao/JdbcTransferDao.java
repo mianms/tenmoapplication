@@ -13,15 +13,17 @@ import java.util.List;
 @Component
 public class JdbcTransferDao implements TransferDao {
     private JdbcTemplate jdbcTemplate;
+//    private AccountDao accountDao;
 
     public JdbcTransferDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
     @Override
-    public Transfer getTransferById(int id) {
-        Transfer transfer = null;
-        String sql = "SELECT transfer_id, to_account_id, from_account_id, transfer_amount, transfer_status WHERE transfer_id = ?";
+    public Transfer getTransferByIdForTransfers(int id) {
+        Transfer transfer = new Transfer();
+        String sql = "SELECT transfer_id, account_to, account_from, transfer_amount FROM transfer WHERE transfer_id = ?";
 
         try {
             SqlRowSet results = this.jdbcTemplate.queryForRowSet(sql, id);
@@ -37,23 +39,30 @@ public class JdbcTransferDao implements TransferDao {
     }
 
 
-    public Transfer createTransfer(int toAccountId, int fromAccountId, int transferAmount, boolean transferStatus) {
+    @Override
+    public Transfer createTransfer(Transfer transfer) {
 
-        Transfer newTransfer = null;
         String sql = "INSERT INTO transfer (" +
-                "account_from, account_to, transfer_amount, transfer_status) " +
-                "VALUES (?, ?, ?, ?) RETURNING transfer_id";
+                "account_from, account_to, transfer_amount) " +
+                "VALUES (?, ?, ?) RETURNING transfer_id";
 
         try {
             int newTransferId = this.jdbcTemplate.queryForObject(
                     sql,
                     Integer.class,
-                    fromAccountId,
-                    toAccountId,
-                    transferAmount,
-                    transferStatus);
+                    transfer.getFromAccountId(),
+                    transfer.getToAccountId(),
+                    transfer.getTransferAmount());
 
-            return getTransferById(newTransferId);
+//            //update balances
+//            BigDecimal transferAmount = transfer.getTransferAmount();
+//            int fromId = transfer.getFromAccountId();
+//            int toId = transfer.getToAccountId();
+//
+//            accountDao.updateFromAccount(transferAmount, fromId);
+//            accountDao.updateToAccount(transferAmount, toId);
+
+            return getTransferByIdForTransfers(newTransferId);
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);
@@ -65,21 +74,36 @@ public class JdbcTransferDao implements TransferDao {
     @Override
     public List<Transfer> transferHistory(int accountId) {
         List<Transfer> listOfTransfers = new ArrayList<>();
-        String sql = "SELECT transfer_id, to_account_id, from_account_id, transfer_amount, transfer_status " +
-                     "FROM transfer WHERE to_account_id = ? OR from_account_id = ?";
+        String sql = "SELECT transfer_id, account_from, account_to, transfer_amount " +
+                     "FROM transfer WHERE account_from = ? OR account_to = ?";
         SqlRowSet result = this.jdbcTemplate.queryForRowSet(sql, accountId, accountId);
         while (result.next()) {
             int id = result.getInt("transfer_id");
-            int toAccountId = result.getInt("to_account_id");
-            int fromAccountId = result.getInt("from_account_id");
+            int toAccountId = result.getInt("account_from");
+            int fromAccountId = result.getInt("account_to");
             BigDecimal transferAmount = result.getBigDecimal("transfer_amount");
-            Boolean transferStatus = true;
-            Transfer transfer = new Transfer(id, toAccountId, fromAccountId, transferAmount, transferStatus);
+            Transfer transfer = new Transfer(id, toAccountId, fromAccountId, transferAmount);
             listOfTransfers.add(transfer);
 
         }
         return listOfTransfers;
     }
+
+
+
+    @Override
+    public int getAccountIdForTransfers(String username) {
+        String sql = "SELECT account_id FROM account WHERE username = ?";
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql,username);
+        int id = 0;
+        if (result.next()) {
+            id = result.getInt("account_id");
+        }
+       return id;
+    }
+
+
+
 
     private Transfer mapRowToTransfer(SqlRowSet trans) {
         Transfer transfer = new Transfer();
@@ -87,7 +111,6 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setFromAccountId(trans.getInt("account_from"));
         transfer.setToAccountId(trans.getInt("account_to"));
         transfer.setTransferAmount(trans.getBigDecimal("transfer_amount"));
-        transfer.setTransferStatus(trans.getBoolean("transfer_status"));
         return transfer;
     }
 

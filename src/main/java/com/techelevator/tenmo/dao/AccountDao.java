@@ -8,4 +8,9 @@ public interface AccountDao {
 
      Account getUsernameAndBalance(String username);
 
+     Account getAccountById(int id);
+
+     Account updateFromAccount(BigDecimal transferAmount, int id);
+     Account updateToAccount (BigDecimal transferAmount, int id);
+
 }

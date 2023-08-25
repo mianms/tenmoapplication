@@ -1,10 +1,18 @@
 package com.techelevator.tenmo.controller;
 
+import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @PreAuthorize("isAuthenticated()")
 @RestController
@@ -12,8 +20,44 @@ import org.springframework.web.bind.annotation.RestController;
 public class TransferController {
 
     private TransferDao transferDao;
-
-    public TransferController(TransferDao transferDao) {
+    private AccountDao accountDao;
+    public TransferController(TransferDao transferDao, AccountDao accountDao1) {
         this.transferDao = transferDao;
+        this.accountDao = accountDao1;
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(path = "/transfer", method = RequestMethod.POST)
+    public Transfer addTransfer(@Valid @RequestBody Transfer transfer) {
+
+        Transfer createdTransfer = transferDao.createTransfer(transfer);
+
+        //update balances
+        BigDecimal transferAmount = createdTransfer.getTransferAmount();
+        int fromId = createdTransfer.getFromAccountId();
+        int toId =createdTransfer.getToAccountId();
+
+        accountDao.updateFromAccount(transferAmount, fromId);
+
+        accountDao.updateToAccount(transferAmount, toId);
+
+
+        return createdTransfer;
+    }
+
+    @RequestMapping(path = "/transfer", method = RequestMethod.GET)
+    public List <Transfer>  transferHistory (Principal principal) {
+       String username = principal.getName();
+       int id = transferDao.getAccountIdForTransfers(username);
+
+      List <Transfer> transfers = transferDao.transferHistory(id);
+
+      return transfers;
+    }
+
+    @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)
+    public Transfer  getTransfer (@PathVariable int id) {
+        Transfer transfer = transferDao.getTransferByIdForTransfers(id);
+        return transfer;
     }
 }

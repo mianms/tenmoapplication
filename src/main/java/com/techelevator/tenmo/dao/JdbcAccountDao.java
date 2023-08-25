@@ -98,6 +98,11 @@ public class JdbcAccountDao implements AccountDao {
 
     }
 
+    @Override
+    public int getAccountId(String username) {
+        return 0;
+    }
+
 
     public Account mapRowToAccount(SqlRowSet rs) {
         Account account = new Account();

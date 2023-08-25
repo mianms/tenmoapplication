@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.controller;
 
+import com.techelevator.tenmo.DaoException.DaoException;
 import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.model.Account;
@@ -49,6 +50,15 @@ public class TransferController {
           accountDao.updateFromAccount(transferAmount, fromId);
 
           accountDao.updateToAccount(transferAmount, toId);
+      } else if (!transferServiceDao.amountGreaterThanZero(amountToTransfer)) {
+
+          throw new DaoException("Please enter an amount greater than zero.");
+
+      } else if (!transferServiceDao.amountLessThanBalance(amountToTransfer,balance)){
+
+          throw new DaoException("Insufficient funds");
+
+
       }
 
 

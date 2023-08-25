@@ -12,5 +12,5 @@ public interface AccountDao {
 
      Account updateFromAccount(BigDecimal transferAmount, int id);
      Account updateToAccount (BigDecimal transferAmount, int id);
-
+     int getAccountId (String username);
 }

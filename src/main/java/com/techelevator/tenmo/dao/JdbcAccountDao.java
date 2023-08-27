@@ -100,7 +100,22 @@ public class JdbcAccountDao implements AccountDao {
 
     @Override
     public int getAccountId(String username) {
-        return 0;
+        int id = 0;
+        String sql = "SELECT account_id FROM account WHERE username = ?";
+        try {
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, username);
+            if (results.next()) {
+               id = results.getInt("account_id");
+
+            }
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Unable to connect to server or database", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new DaoException("Data integrity violation", e);
+        }
+
+
+        return id;
     }
 
 

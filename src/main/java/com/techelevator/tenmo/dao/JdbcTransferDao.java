@@ -13,7 +13,7 @@ import java.util.List;
 @Component
 public class JdbcTransferDao implements TransferDao {
     private JdbcTemplate jdbcTemplate;
-    private AccountDao accountDao;
+
 
     public JdbcTransferDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -41,32 +41,6 @@ public class JdbcTransferDao implements TransferDao {
 
     @Override
     public Transfer createTransfer(Transfer transfer) {
-
-        String sql = "INSERT INTO transfer (" +
-                "account_from, account_to, transfer_amount) " +
-                "VALUES (?, ?, ?) RETURNING transfer_id";
-
-        try {
-            int newTransferId = this.jdbcTemplate.queryForObject(
-                    sql,
-                    Integer.class,
-                    transfer.getFromAccountId(),
-                    transfer.getToAccountId(),
-                    transfer.getTransferAmount());
-
-
-            return getTransferByIdForTransfers(newTransferId);
-
-        } catch (CannotGetJdbcConnectionException e) {
-            throw new DaoException("Unable to connect to server or database", e);
-        } catch (DataIntegrityViolationException e) {
-            throw new DaoException("Data integrity violation", e);
-        }
-    }
-
-    public Transfer createTransfer(String recipientUsername, BigDecimal amount) {
-
-
 
         String sql = "INSERT INTO transfer (" +
                 "account_from, account_to, transfer_amount) " +

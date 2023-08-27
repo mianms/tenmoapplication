@@ -19,7 +19,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("api")
 public class TransferController {
@@ -35,45 +35,11 @@ public class TransferController {
         this.transferBodyDao = transferBodyDao;
     }
 
+
+
+
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfer", method = RequestMethod.POST)
-    public Transfer addTransfer(@Valid @RequestBody Transfer transfer) {
-
-        int accountID = transfer.getFromAccountId();
-        BigDecimal balance = accountDao.getAccountById(accountID).getBalance();
-        BigDecimal amountToTransfer = transfer.getTransferAmount();
-        Transfer createdTransfer = new Transfer();
-
-      if  ( transferServiceDao.amountGreaterThanZero(amountToTransfer) && transferServiceDao.amountLessThanBalance(amountToTransfer,balance)) {
-           createdTransfer = transferDao.createTransfer(transfer);
-
-          //update balances
-          BigDecimal transferAmount = createdTransfer.getTransferAmount();
-          int fromId = createdTransfer.getFromAccountId();
-          int toId = createdTransfer.getToAccountId();
-
-          accountDao.updateFromAccount(transferAmount, fromId);
-
-          accountDao.updateToAccount(transferAmount, toId);
-      } else if (!transferServiceDao.amountGreaterThanZero(amountToTransfer)) {
-
-          throw new DaoException("Please enter an amount greater than zero.");
-
-      } else if (!transferServiceDao.amountLessThanBalance(amountToTransfer,balance)){
-
-          throw new DaoException("Insufficient funds");
-
-
-      }
-
-
-        return createdTransfer;
-    }
-
-
-
-    @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(path = "/transfer2", method = RequestMethod.POST)
     public TransferResponseBody addTransfer(Principal principal, @RequestBody TransactionRequest transactionRequest) {
 
         TransferResponseBody transferResponse = new TransferResponseBody();
